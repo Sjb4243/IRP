@@ -32,6 +32,7 @@ def get_names(recep_files, lig_files):
 
 
 def run_vina(matrix, recep_files, lig_files, recep_names, lig_names):
+    error_list = []
     for index, receptor in enumerate(zip(recep_files, recep_names), 1):
         for index2, ligand in enumerate(zip(lig_files, lig_names), 1):
             print(f"Docking {receptor[1]} and {ligand[1]}...")
@@ -43,7 +44,6 @@ def run_vina(matrix, recep_files, lig_files, recep_names, lig_names):
             energy_list = [row[0] for row in energies]
             min_energy = min(energy_list)
             matrix[index][index2] = min_energy
-            error_list = []
             if v.score()[0] != min_energy:
                 print("\nSort error detected")
                 error_list.append([receptor[1], ligand[1]])
@@ -80,7 +80,7 @@ def main():
     receptor_names, ligand_names = get_names(receptor_files, ligand_files)
     matrix = initialise_matrix(receptor_names,ligand_names)
     #run_vina(matrix, receptor_files, ligand_files, receptor_names, ligand_names)
-    run_replicates(2, receptor_files, ligand_files, receptor_names)
+    run_replicates(500, receptor_files, ligand_files, receptor_names)
 
 
 main()
