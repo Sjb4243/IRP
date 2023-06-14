@@ -2,3 +2,4 @@
 *.pdbqt
 .idea/
 idea/
+.gitignore
