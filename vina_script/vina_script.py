@@ -72,6 +72,36 @@ def run_replicates(number, recep_files, lig_files, recep_names):
     df = pd.DataFrame(results_list, columns= ["run", "binding_energy", "receptor"])
     df.to_csv("final.csv", index=False)
 
+def run_exhaustivness_replicates(receptor_files, ligand_files):
+    results_list = []
+    x = ""
+    receptor = receptor_files[1]
+    shortest = ligand_files[1]
+    longeest = ligand_files[3]
+    ligand_list = [shortest,longeest]
+    for exhaustiveness in range(8, 66, 2):
+        for ligand in ligand_list:
+            for i in range(5):
+                v = Vina(sf_name="vina")
+                v.set_receptor(receptor)
+                v.set_ligand_from_file(ligand)
+                v.compute_vina_maps(center=[-17.8626, -4.41595, -15.0678], box_size=[17.94, 12.61, 16.09])
+                v.dock(exhaustiveness=exhaustiveness, n_poses=3)
+                energies = v.energies()
+                energy_list = [row[0] for row in energies]
+                min_energy = min(energy_list)
+                if ligand == ligand_list[0]:
+                    x = "shortest"
+                if ligand == ligand_list[1]:
+                    x = "longest"
+                results_list.append([min_energy, x, exhaustiveness])
+    df = pd.DataFrame(results_list, columns=["binding_energy", "length", "exhaustiveness"])
+    df.to_csv("exhaustiveness.csv", index = False)
+
+
+
+    print(ligand_files)
+
 
 def main():
     receptor_folder = "/home/sjb176/IRP/pymol/docking_receptors/"
@@ -80,7 +110,8 @@ def main():
     receptor_names, ligand_names = get_names(receptor_files, ligand_files)
     matrix = initialise_matrix(receptor_names,ligand_names)
     #run_vina(matrix, receptor_files, ligand_files, receptor_names, ligand_names)
-    run_replicates(500, receptor_files, ligand_files, receptor_names)
+    #run_replicates(500, receptor_files, ligand_files, receptor_names)
+    run_exhaustivness_replicates(receptor_files, ligand_files)
 
 
 main()
